@@ -9,13 +9,13 @@ import (
 
 	"MortgageAgent/internal/models"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func InitDB(dsn string) (*sql.DB, error) {
 	// For SQLite, DSN is typically just a file name
-	db, err := sql.Open("sqlite3", dsn)
+	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		return nil, err
 	}
