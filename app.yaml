@@ -1,4 +1,2 @@
-runtime : go
-env : flex
-manual_scaling:
-  instances: 1 
+runtime: go120
+entrypoint: "go run ./cmd/main.go"
