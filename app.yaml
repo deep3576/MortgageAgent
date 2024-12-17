@@ -1,2 +1,2 @@
 runtime: go123
-entrypoint: "go run ./cmd/main.go"
+entrypoint: "go run ./cmd"
