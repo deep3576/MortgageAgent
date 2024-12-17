@@ -30,13 +30,14 @@ func main() {
 	// Serve static files (CSS, JS, images)
 	fileServer := http.FileServer(http.Dir("internal/static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fileServer))
-
 	mux.HandleFunc("/", handlers.LoginPage(database))
 	mux.HandleFunc("/login", handlers.Login(database))
 	mux.HandleFunc("/signup", handlers.SignUpPage(database))
+	mux.HandleFunc("/signup-success", handlers.SignUpSuccessPage())
 	mux.HandleFunc("/register", handlers.Register(database))
-	mux.Handle("/broker", handlers.AuthMiddleware(handlers.BrokerLanding(), database))
-	mux.Handle("/admin", handlers.AuthMiddleware(handlers.AdminLanding(), database))
+	mux.Handle("/broker", handlers.AuthMiddleware(handlers.BrokerLanding(), database, "broker"))
+	mux.Handle("/admin", handlers.AuthMiddleware(handlers.AdminLanding(), database, "admin"))
+
 	mux.Handle("/logout", handlers.Logout())
 
 	log.Println("Server running on :8080")

@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"errors"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -26,18 +27,21 @@ func MigrateDB(db *sql.DB) error {
 	query := `
 	CREATE TABLE IF NOT EXISTS users (
 		id INT AUTO_INCREMENT PRIMARY KEY,
+		first_name VARCHAR(100),
+		last_name VARCHAR(100),
 		email VARCHAR(255) UNIQUE NOT NULL,
 		password_hash TEXT NOT NULL,
+		phone VARCHAR(20),
+		postal_code VARCHAR(20),
 		user_type VARCHAR(50) NOT NULL,
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	);`
-
 	_, err := db.Exec(query)
 	return err
 }
 
 func SeedAdminUser(db *sql.DB) error {
-	// Check if admin user already exists
+	// Check if an admin user exists
 	var count int
 	err := db.QueryRow("SELECT COUNT(*) FROM users WHERE user_type='admin'").Scan(&count)
 	if err != nil {
@@ -45,13 +49,12 @@ func SeedAdminUser(db *sql.DB) error {
 	}
 
 	if count == 0 {
-		// Create a default admin user
 		pwHash, err := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
 		if err != nil {
 			return err
 		}
-		_, err = db.Exec("INSERT INTO users (email, password_hash, user_type) VALUES (?, ?, ?)", "admin@company.com", string(pwHash), "admin")
-
+		_, err = db.Exec("INSERT INTO users (first_name, last_name, email, password_hash, user_type) VALUES (?, ?, ?, ?, ?)",
+			"Admin", "User", "admin@company.com", string(pwHash), "admin")
 		if err != nil {
 			return err
 		}
@@ -62,9 +65,15 @@ func SeedAdminUser(db *sql.DB) error {
 
 // GetUserByEmail fetches a user by email
 func GetUserByEmail(db *sql.DB, email string) (*models.User, error) {
+	email = strings.TrimSpace(email)
+
+	if err := db.Ping(); err != nil {
+		println("Debug: DB ping failed:", err)
+	}
+
 	u := &models.User{}
-	row := db.QueryRow("SELECT id, email, password_hash, user_type FROM users WHERE email=?", email)
-	err := row.Scan(&u.ID, &u.Email, &u.PasswordHash, &u.UserType)
+	row := db.QueryRow("SELECT id, first_name, last_name, email, password_hash, phone, postal_code, user_type FROM users WHERE email=?", email)
+	err := row.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.PasswordHash, &u.Phone, &u.PostalCode, &u.UserType)
 	if err != nil {
 		return nil, err
 	}
@@ -72,10 +81,10 @@ func GetUserByEmail(db *sql.DB, email string) (*models.User, error) {
 }
 
 // CreateUser creates a broker user
-func CreateUser(db *sql.DB, email, password string) error {
+func CreateUser(db *sql.DB, firstName, lastName, email, phone, postalCode, password string) error {
 	// Check if user already exists
-	user, _ := GetUserByEmail(db, email)
-	if user != nil {
+	_, err := GetUserByEmail(db, email)
+	if err == nil {
 		return errors.New("user already exists")
 	}
 
@@ -84,6 +93,7 @@ func CreateUser(db *sql.DB, email, password string) error {
 		return err
 	}
 
-	_, err = db.Exec("INSERT INTO users (email, password_hash, user_type) VALUES (?, ?, ?)", email, pwHash, "broker")
+	_, err = db.Exec("INSERT INTO users (first_name, last_name, email, password_hash, phone, postal_code, user_type) VALUES (?, ?, ?, ?, ?, ?, ?)",
+		firstName, lastName, email, pwHash, phone, postalCode, "broker")
 	return err
 }

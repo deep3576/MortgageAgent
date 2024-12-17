@@ -1,33 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/> 
-    <title>Login - Mortgage Solutions</title>
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&display=swap" rel="stylesheet">
+    <title>Login</title>
     <link rel="stylesheet" href="/static/css/login.css">
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-box animated-fade-in">
-            <div class="logo-container">
-                <img src="/static/images/logo.png" alt="Company Logo" class="logo">
-            </div>
-            <h2>Welcome Back!</h2>
-            <p class="tagline">Secure your future, one mortgage at a time.</p>
-            <form method="post" action="/login" class="login-form">
-                <div class="input-group">
-                    <label>Email</label>
-                    <input type="text" name="email" placeholder="Enter your email" required>
-                </div>
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" name="password" placeholder="Enter your password" required>
-                </div>
-                <button type="submit" class="login-btn">Login</button>
-            </form>
-            <p class="signup-link">Don’t have an account? <a href="/signup">Sign Up</a></p>
+<div class="login-container">
+    <div class="login-box animated-fade-in">
+        <div class="logo-container">
+            <img src="/static/images/logo.png" alt="Company Logo" class="logo">
         </div>
+        <h2>Welcome Back!</h2>
+        <p class="tagline">Secure your future, one mortgage at a time.</p>
+
+        {{ if .ErrorMessage }}
+        <div class="error-message">
+            {{.ErrorMessage}}
+        </div>
+        {{ end }}
+
+        <form method="post" action="/login" class="login-form">
+            <div class="input-group">
+                <label>Email</label>
+                <input type="text" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="login-btn">Login</button>
+        </form>
+        <p class="signup-link">Don’t have an account? <a href="/signup">Sign Up</a></p>
     </div>
+</div>
 </body>
 </html>
