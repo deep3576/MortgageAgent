@@ -9,15 +9,14 @@ import (
 
 	"MortgageAgent/internal/models"
 
+	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func InitDB(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("mysql", dsn)
+	// For SQLite, DSN is typically just a file name
+	db, err := sql.Open("sqlite3", dsn)
 	if err != nil {
-		return nil, err
-	}
-	if err = db.Ping(); err != nil {
 		return nil, err
 	}
 	return db, nil
@@ -25,23 +24,22 @@ func InitDB(dsn string) (*sql.DB, error) {
 
 func MigrateDB(db *sql.DB) error {
 	query := `
-	CREATE TABLE IF NOT EXISTS users (
-		id INT AUTO_INCREMENT PRIMARY KEY,
-		first_name VARCHAR(100),
-		last_name VARCHAR(100),
-		email VARCHAR(255) UNIQUE NOT NULL,
-		password_hash TEXT NOT NULL,
-		phone VARCHAR(20),
-		postal_code VARCHAR(20),
-		user_type VARCHAR(50) NOT NULL,
-		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-	);`
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        first_name TEXT,
+        last_name TEXT,
+        email TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        phone TEXT,
+        postal_code TEXT,
+        user_type TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );`
 	_, err := db.Exec(query)
 	return err
 }
 
 func SeedAdminUser(db *sql.DB) error {
-	// Check if an admin user exists
 	var count int
 	err := db.QueryRow("SELECT COUNT(*) FROM users WHERE user_type='admin'").Scan(&count)
 	if err != nil {
@@ -53,11 +51,9 @@ func SeedAdminUser(db *sql.DB) error {
 		if err != nil {
 			return err
 		}
-		_, err = db.Exec("INSERT INTO users (first_name, last_name, email, password_hash, user_type) VALUES (?, ?, ?, ?, ?)",
-			"Admin", "User", "admin@company.com", string(pwHash), "admin")
-		if err != nil {
-			return err
-		}
+		_, err = db.Exec("INSERT INTO users (first_name, last_name, email, password_hash, phone, postal_code, user_type) VALUES (?, ?, ?, ?,?,?, ?)",
+			"Admin", "User", "admin@company.com", string(pwHash), "555-666-7777", "N3H0C3", "admin")
+		return err
 	}
 
 	return nil

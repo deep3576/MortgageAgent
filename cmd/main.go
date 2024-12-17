@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	dsn := "admin:@tcp(127.0.0.1:3306)/MortgageProject?parseTime=true"
+	dsn := "app.db"
 	database, err := db.InitDB(dsn)
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
