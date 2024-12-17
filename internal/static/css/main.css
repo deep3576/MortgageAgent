@@ -1,0 +1,107 @@
+body {
+    margin: 0;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #2d89ef;
+    padding: 10px 20px;
+}
+
+.nav-logo {
+    height: 40px;
+}
+
+.top-nav nav a {
+    color: #fff;
+    margin-left: 20px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.hero-section {
+    display: flex;
+    padding: 40px 20px;
+    background: #f8f8f8;
+}
+
+.hero-content {
+    flex: 1;
+    padding: 20px;
+}
+
+.hero-content h1 {
+    margin-top: 0;
+    font-size: 2em;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    font-size: 1em;
+    color: #333;
+    line-height: 1.6;
+}
+
+.hero-image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero-image img {
+    max-width: 80%;
+    border-radius: 8px;
+}
+
+.features {
+    padding: 40px 20px;
+    background: #ffffff;
+    text-align: center;
+}
+
+.features h2 {
+    margin-top: 0;
+    font-size: 1.8em;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.features ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.features li {
+    font-size: 1em;
+    color: #333;
+    padding: 10px;
+}
+
+footer {
+    background: #2d89ef;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+}
+.reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease-out;
+}
+
+.reveal-on-scroll.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Input focus animation (simple scale effect) */
+.input-focus-animation {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transform: scale(1.02);
+    box-shadow: 0 0 5px rgba(0,0,0,0.15);
+}

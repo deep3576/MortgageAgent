@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Mortgage Solutions</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box animated-fade-in">
+            <h2>Create Your Account</h2>
+            <p class="tagline">Join us and simplify your mortgage journey.</p>
+            <form method="post" action="/register" class="login-form">
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="Choose a password" required>
+                </div>
+                <button type="submit" class="login-btn">Sign Up</button>
+            </form>
+            <p class="signup-link">Already have an account? <a href="/">Login</a></p>
+        </div>
+    </div>
+</body>
+</html>
