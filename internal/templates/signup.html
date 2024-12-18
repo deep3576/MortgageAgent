@@ -6,8 +6,8 @@
     <title>Sign Up - Mortgage Solutions</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/login.css">
-    <link rel="javascript" href="/static/js/signup.js">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1sZ2oiwDFzCghrR/658Bgg3FLjWdxJCXEX+pfr1fyDnn5m5CCwAFjtWHNmdB6nVXdPhel8J1ZkKiZDL1cnClyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-xyz" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="/static/js/signup.js"></script>
 </head>
 <body>
     <div class="login-container">
@@ -40,12 +40,14 @@
                     <div class="password-wrapper">
                         <input type="password" name="password" id="password" placeholder="Choose a strong password" required>
                         <i class="fas fa-eye" id="togglePassword"></i>
+
                     </div>
                 </div>
                 
                 <div class="input-group">
                     <label>Confirm Password</label>
                     <input type="password" name="confirm_password" id="confirm_password" placeholder="Re-enter your password" required>
+                    <i class="fas fa-eye" id="togglePassword"></i>
                 </div>
                 <div id="error-message" style="color:red; font-weight:bold; display:none;">Passwords do not match.</div>
                 <button type="submit" class="login-btn">Sign Up</button>

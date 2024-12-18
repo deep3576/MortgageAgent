@@ -4,13 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"strings"
-
-	_ "github.com/go-sql-driver/mysql"
-
 	"MortgageAgent/internal/models"
 
-	_ "modernc.org/sqlite"
 	"golang.org/x/crypto/bcrypt"
+	_ "modernc.org/sqlite"
 )
 
 func InitDB(dsn string) (*sql.DB, error) {
