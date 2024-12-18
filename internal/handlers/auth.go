@@ -36,6 +36,22 @@ type LoginPageData struct {
 	ErrorMessage string
 }
 
+type SignupPageData struct {
+	ErrorMessage string
+}
+
+func SignUpPage(database *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.NotFound(w, r)
+			return
+		}
+		data := SignupPageData{ErrorMessage: ""}
+		tmpl := template.Must(template.ParseFiles("internal/templates/signup.html"))
+		tmpl.Execute(w, data)
+	}
+}
+
 func LoginPage(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" || r.Method != http.MethodGet {
@@ -94,17 +110,6 @@ func renderLoginWithError(w http.ResponseWriter, errorMsg string) {
 	tmpl.Execute(w, data)
 }
 
-func SignUpPage(database *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			http.NotFound(w, r)
-			return
-		}
-		tmpl := template.Must(template.ParseFiles("internal/templates/signup.html"))
-		tmpl.Execute(w, nil)
-	}
-}
-
 func Register(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -119,29 +124,28 @@ func Register(database *sql.DB) http.HandlerFunc {
 		postalCode := r.FormValue("postal_code")
 		password := r.FormValue("password")
 
-		// Basic validations
-		if firstName == "" || lastName == "" || email == "" || password == "" {
-			http.Error(w, "Missing required fields", http.StatusBadRequest)
+		// Basic validation for email/password etc. done previously...
+		// Check if user exists
+		user, _ := db.GetUserByEmail(database, email)
+		if user != nil {
+			// User already exists, show error on same page
+			data := SignupPageData{ErrorMessage: "User already exists. Please try a different email."}
+			tmpl := template.Must(template.ParseFiles("internal/templates/signup.html"))
+			tmpl.Execute(w, data)
 			return
 		}
 
-		if !ValidateEmail(email) {
-			http.Error(w, "Invalid email format", http.StatusBadRequest)
-			return
-		}
-
-		if postalCode != "" && !ValidateCanadianPostalCode(postalCode) {
-			http.Error(w, "Invalid Canadian postal code format", http.StatusBadRequest)
-			return
-		}
-
+		// If user doesn't exist, create the user
 		err := db.CreateUser(database, firstName, lastName, email, phone, postalCode, password)
 		if err != nil {
-			http.Error(w, "Error creating user: "+err.Error(), http.StatusBadRequest)
+			// Some other error occurred while creating user
+			data := SignupPageData{ErrorMessage: "Error creating user: " + err.Error()}
+			tmpl := template.Must(template.ParseFiles("internal/templates/signup.html"))
+			tmpl.Execute(w, data)
 			return
 		}
 
-		// Redirect to signup success page
+		// If successful, redirect to signup-success or login
 		http.Redirect(w, r, "/signup-success", http.StatusFound)
 	}
 }
