@@ -106,14 +106,18 @@ h2 {
     font-weight: bold;
 }
 
-.password-wrapper {
-    position: relative;
+.password-wrapper i {
+    font-size: 1.2em; /* give it a size */
+    width: auto;
+    height: auto;
+    display: inline-block; /* ensure it's displayed as an inline-block element */
 }
+
 
 .password-wrapper input[type="password"],
 .password-wrapper input[type="text"] {
     width: 100%;
-    padding-right: 40px; /* space for the icon */
+    /* padding-right: 40px;  space for the icon */
 }
 
 .password-wrapper .fa-eye, 

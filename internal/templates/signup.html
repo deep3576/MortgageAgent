@@ -6,7 +6,6 @@
     <title>Sign Up - Mortgage Solutions</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/login.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-xyz" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="/static/js/signup.js"></script>
 </head>
 <body>
@@ -37,18 +36,52 @@
                 </div>
                 <div class="input-group password-field">
                     <label>Password</label>
-                    <div class="password-wrapper">
+                    <div class="password-wrapper" style="position: relative;">
                         <input type="password" name="password" id="password" placeholder="Choose a strong password" required>
-                        <i class="fas fa-eye" id="togglePassword"></i>
+                        
+                        <!-- Closed Eye Icon (initially visible) -->
+                        <svg id="closedEyeIcon" xmlns="http://www.w3.org/2000/svg" class="eye-icon" viewBox="0 0 24 24" fill="none" 
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" 
+                             style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">
+                          <path d="M17.94 17.94l-1.41-1.41m2.83-2.83-3.54-3.54M9.17 9.17 5.63 5.63M4.22 4.22l1.41 1.41M21 12s-4-8-9-8-9 8-9 8 
+                                   4 8 9 8c2.08 0 4-.8 5.5-2.1M14.12 14.12c-.75.5-1.62.78-2.62.78-2.21 0-4-1.79-4-4 
+                                   0-1 .28-1.87.78-2.62"></path>
+                        </svg>
+                        
+                        <!-- Open Eye Icon (initially hidden) -->
+                        <svg id="openEyeIcon" xmlns="http://www.w3.org/2000/svg" class="eye-icon" viewBox="0 0 24 24" fill="none" 
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" 
+                             style="display:none; position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </div>
+                </div>
 
+                <div class="input-group password-field">
+                    <label>Confirm Password</label>
+                    <div class="password-wrapper" style="position: relative;">
+                        <input type="password" name="confirm_password" id="confirm_password" placeholder="Re-enter your password" required>
+                
+                        <!-- Closed Eye Icon for Confirm Password (initially visible) -->
+                        <svg id="closedEyeIconConfirm" xmlns="http://www.w3.org/2000/svg" class="eye-icon" viewBox="0 0 24 24" fill="none" 
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" 
+                             style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">
+                          <path d="M17.94 17.94l-1.41-1.41m2.83-2.83-3.54-3.54M9.17 9.17 5.63 5.63M4.22 4.22l1.41 1.41M21 12s-4-8-9-8-9 8-9 8 
+                                   4 8 9 8c2.08 0 4-.8 5.5-2.1M14.12 14.12c-.75.5-1.62.78-2.62.78-2.21 0-4-1.79-4-4 
+                                   0-1 .28-1.87.78-2.62"></path>
+                        </svg>
+                        
+                        <!-- Open Eye Icon for Confirm Password (initially hidden) -->
+                        <svg id="openEyeIconConfirm" xmlns="http://www.w3.org/2000/svg" class="eye-icon" viewBox="0 0 24 24" fill="none" 
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" 
+                             style="display:none; position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
                     </div>
                 </div>
                 
-                <div class="input-group">
-                    <label>Confirm Password</label>
-                    <input type="password" name="confirm_password" id="confirm_password" placeholder="Re-enter your password" required>
-                    <i class="fas fa-eye" id="togglePassword"></i>
-                </div>
                 <div id="error-message" style="color:red; font-weight:bold; display:none;">Passwords do not match.</div>
                 <button type="submit" class="login-btn">Sign Up</button>
             </form>
