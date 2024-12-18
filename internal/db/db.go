@@ -1,10 +1,11 @@
 package db
 
 import (
+	"MortgageAgent/internal/models"
 	"database/sql"
 	"errors"
 	"strings"
-	"MortgageAgent/internal/models"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 	_ "modernc.org/sqlite"
@@ -29,7 +30,9 @@ func MigrateDB(db *sql.DB) error {
         password_hash TEXT NOT NULL,
         phone TEXT,
         postal_code TEXT,
-        user_type TEXT NOT NULL,
+        user_type TEXT NOT NULL,reset_token TEXT
+		,
+		reset_token_expires_at DATETIME,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );`
 	_, err := db.Exec(query)
@@ -88,5 +91,29 @@ func CreateUser(db *sql.DB, firstName, lastName, email, phone, postalCode, passw
 
 	_, err = db.Exec("INSERT INTO users (first_name, last_name, email, password_hash, phone, postal_code, user_type) VALUES (?, ?, ?, ?, ?, ?, ?)",
 		firstName, lastName, email, pwHash, phone, postalCode, "broker")
+	return err
+}
+
+func SetResetToken(db *sql.DB, email, token string, expires time.Time) error {
+	_, err := db.Exec("UPDATE users SET reset_token=?, reset_token_expires_at=? WHERE email=?", token, expires, email)
+	return err
+}
+
+func GetUserByResetToken(db *sql.DB, token string) (*models.User, error) {
+	u := &models.User{}
+	row := db.QueryRow("SELECT id, first_name, last_name, email, password_hash, phone, postal_code, user_type, reset_token_expires_at FROM users WHERE reset_token=?", token)
+	var expiresAt time.Time
+	err := row.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.PasswordHash, &u.Phone, &u.PostalCode, &u.UserType, &expiresAt)
+	if err != nil {
+		return nil, err
+	}
+	if time.Now().After(expiresAt) {
+		return nil, sql.ErrNoRows // token expired
+	}
+	return u, nil
+}
+
+func UpdateUserPassword(db *sql.DB, userID int, newHash string) error {
+	_, err := db.Exec("UPDATE users SET password_hash=?, reset_token=NULL, reset_token_expires_at=NULL WHERE id=?", newHash, userID)
 	return err
 }

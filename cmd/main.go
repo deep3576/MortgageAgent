@@ -37,6 +37,8 @@ func main() {
 	mux.HandleFunc("/register", handlers.Register(database))
 	mux.Handle("/broker", handlers.AuthMiddleware(handlers.BrokerLanding(), database, "broker"))
 	mux.Handle("/admin", handlers.AuthMiddleware(handlers.AdminLanding(), database, "admin"))
+	mux.HandleFunc("/forgot-password", handlers.ForgotPasswordPage(database))
+	mux.HandleFunc("/reset-password", handlers.ResetPasswordPage(database))
 
 	mux.Handle("/logout", handlers.Logout())
 
