@@ -6,13 +6,14 @@
     <title>Sign Up - Mortgage Solutions</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-xxx" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
     <div class="login-container">
         <div class="login-box animated-fade-in">
             <h2>Create Your Account</h2>
             <p class="tagline">Join us and simplify your mortgage journey.</p>
-            <form method="post" action="/register" class="login-form">
+            <form method="post" action="/register" class="login-form" onsubmit="return validatePasswords();">
                 <div class="input-group">
                     <label>First Name</label>
                     <input type="text" name="first_name" placeholder="John" required>
@@ -33,14 +34,23 @@
                     <label>Canadian Postal Code</label>
                     <input type="text" name="postal_code" placeholder="A1A 1A1">
                 </div>
-                <div class="input-group">
+                <div class="input-group password-field">
                     <label>Password</label>
-                    <input type="password" name="password" placeholder="Choose a strong password" required>
+                    <div class="password-wrapper">
+                        <input type="password" name="password" id="password" placeholder="Choose a strong password" required>
+                        <i class="fa-solid fa-eye" id="togglePassword"></i>
+                    </div>
                 </div>
+                <div class="input-group">
+                    <label>Confirm Password</label>
+                    <input type="password" name="confirm_password" id="confirm_password" placeholder="Re-enter your password" required>
+                </div>
+                <div id="error-message" style="color:red; font-weight:bold; display:none;">Passwords do not match.</div>
                 <button type="submit" class="login-btn">Sign Up</button>
             </form>
             <p class="signup-link">Already have an account? <a href="/">Login</a></p>
         </div>
     </div>
+    <script src="/static/js/signup.js"></script>
 </body>
 </html>

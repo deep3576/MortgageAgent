@@ -105,3 +105,23 @@ h2 {
     text-align: center;
     font-weight: bold;
 }
+
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input[type="password"],
+.password-wrapper input[type="text"] {
+    width: 100%;
+    padding-right: 40px; /* space for the icon */
+}
+
+.password-wrapper .fa-eye, 
+.password-wrapper .fa-eye-slash {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #555;
+}
