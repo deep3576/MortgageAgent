@@ -1,0 +1,190 @@
+<!-- internal/templates/admin_dashboard.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Mortgage Solutions</title>
+    <link rel="stylesheet" href="/static/css/admin_dashboard.css">
+    <style>
+        /* Basic styles; you can enhance this with your own CSS */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .top-nav {
+            background-color: #2980b9;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            height: 40px;
+        }
+
+        .top-nav nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: bold;
+        }
+
+        .dashboard-container {
+            padding: 20px;
+        }
+
+        .dashboard-container h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .action-link {
+            color: #2980b9;
+            text-decoration: none;
+        }
+
+        .action-link:hover {
+            text-decoration: underline;
+        }
+
+        .no-applications {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: 50px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+
+            th {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            tr {
+                margin-bottom: 20px;
+            }
+
+            td {
+                border: none;
+                position: relative;
+                padding-left: 50%;
+            }
+
+            td:before {
+                position: absolute;
+                top: 12px;
+                left: 12px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                font-weight: bold;
+            }
+
+            td:nth-of-type(1):before { content: "Application ID"; }
+            td:nth-of-type(2):before { content: "Broker ID"; }
+            td:nth-of-type(3):before { content: "Application Type"; }
+            td:nth-of-type(4):before { content: "Created At"; }
+            td:nth-of-type(5):before { content: "Documents"; }
+            td:nth-of-type(6):before { content: "Actions"; }
+        }
+    </style>
+</head>
+<body>
+    <header class="top-nav">
+        <img src="/static/images/logo.png" class="nav-logo" alt="Company Logo">
+        <nav>
+            <a href="/admin-dashboard">Dashboard</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    </header>
+
+    <div class="dashboard-container">
+        <h2>Assigned Mortgage Applications</h2>
+
+        {{ if .ErrorMessage }}
+            <div class="error-message">
+                {{.ErrorMessage}}
+            </div>
+        {{ end }}
+
+        {{ if .Applications }}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Application ID</th>
+                        <th>Broker ID</th>
+                        <th>Application Type</th>
+                        <th>Created At</th>
+                        <th>Documents</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .Applications }}
+                        <tr>
+                            <td>{{.ID}}</td>
+                            <td>{{.BrokerID}}</td>
+                            <td>{{.ApplicationType}}</td>
+                            <td>{{.CreatedAt.Format "Jan 2, 2006 3:04 PM"}}</td>
+                            <td>
+                                <ul>
+                                    {{ range .Documents }}
+                                        <li>
+                                            {{.Category}}: 
+                                            <a href="/serve-document?path={{.FilePath}}" target="_blank" class="action-link">View</a>
+                                        </li>
+                                    {{ end }}
+                                </ul>
+                            </td>
+                            <td>
+                                <a href="/view-application?id={{.ID}}" class="action-link">View Details</a>
+                            </td>
+                        </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        {{ else }}
+            <p class="no-applications">No applications assigned at the moment.</p>
+        {{ end }}
+    </div>
+
+    <footer>
+        <p style="text-align:center; padding:20px; background-color:#f2f2f2;">&copy; 2024 Mortgage Solutions. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>

@@ -94,9 +94,11 @@ func ApplicationFormPage(database *sql.DB) http.HandlerFunc {
 			}
 
 			// Directory to store uploads (ensure this directory exists and is writable)
+			baseDir := "uploads"
+			os.MkdirAll(baseDir, 0777)
 
 			for _, cat := range categories {
-				processFile(cat, r, database, w, appID)
+				processFile(baseDir, cat, r, database, w, appID)
 			}
 			// for _, cat := range categories {
 
@@ -139,7 +141,7 @@ func ApplicationFormPage(database *sql.DB) http.HandlerFunc {
 
 			// Assign application to admin (round robin)
 
-			adminID, err := db.AssignApplicationToAdmin(database, int64(app.ID))
+			adminID, err := db.AssignApplicationToAdmin(database, app.ID)
 			if err != nil {
 				http.Error(w, "Failed to assign admin", http.StatusInternalServerError)
 				return
@@ -155,15 +157,14 @@ func ApplicationFormPage(database *sql.DB) http.HandlerFunc {
 	}
 }
 
-func processFile(cat string, r *http.Request, database *sql.DB, w http.ResponseWriter, appID string) {
-	uploadDir := "uploads" + "/" + appID + "/" + cat
+func processFile(baseDir string, cat string, r *http.Request, database *sql.DB, w http.ResponseWriter, appID string) {
+
+	uploadDir := baseDir + "/" + appID + "/" + cat
 	os.MkdirAll(uploadDir, 0777)
 
 	fmt.Println("category ::" + cat)
 
 	file, header, err := r.FormFile(cat)
-
-	fmt.Println(header)
 
 	if err == nil && header != nil {
 		defer file.Close()

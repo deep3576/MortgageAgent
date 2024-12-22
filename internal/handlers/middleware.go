@@ -48,3 +48,5 @@ func GetUserFromContext(r *http.Request) *models.User {
 	}
 	return u
 }
+
+// GetUserFromContext retrieves the user from the request context.

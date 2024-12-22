@@ -4,6 +4,7 @@ import (
 	"MortgageAgent/internal/models"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -160,39 +161,73 @@ func AddDocument(db *sql.DB, applicationID int, category, filePath string) error
 }
 
 // Round-robin assignment logic
-func AssignApplicationToAdmin(db *sql.DB, applicationID int64) (int, error) {
-	// Example logic: Suppose we have an admins table with ids [1,2,3,...]
-	// Keep track of last_assigned in a simple settings table or memory
-	var lastAssigned int
-	err := db.QueryRow("SELECT value FROM settings WHERE key='last_assigned_admin_id'").Scan(&lastAssigned)
-	if err != nil {
-		// if no entry yet, start with admin 1
-		lastAssigned = 0
-	}
+// internal/db/db.go
 
-	// Get next admin
-	var nextAdmin int
-	err = db.QueryRow("SELECT id FROM users WHERE user_type='admin' AND id > ? ORDER BY id LIMIT 1", lastAssigned).Scan(&nextAdmin)
+func AssignApplicationToAdmin(db *sql.DB, applicationID int) (int, error) {
+	// Fetch all admin IDs ordered by ID
+	rows, err := db.Query("SELECT id FROM users WHERE user_type='admin' ORDER BY id ASC")
 	if err != nil {
-		// if no admin found after lastAssigned, wrap around to the first admin
-		err = db.QueryRow("SELECT id FROM users WHERE user_type='admin' ORDER BY id LIMIT 1").Scan(&nextAdmin)
-		if err != nil {
-			return 0, err // No admin found at all
+		return 0, err
+	}
+	defer rows.Close()
+
+	var adminIDs []int
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			return 0, err
 		}
+		adminIDs = append(adminIDs, id)
 	}
 
-	_, err = db.Exec("UPDATE applications SET assigned_admin_id=? WHERE id=?", nextAdmin, applicationID)
+	if len(adminIDs) == 0 {
+		return 0, errors.New("no admins available for assignment")
+	}
+
+	// Fetch the last assigned admin ID from settings
+	var lastAssignedAdminID sql.NullInt64
+	err = db.QueryRow("SELECT value FROM settings WHERE key='last_assigned_admin_id'").Scan(&lastAssignedAdminID)
+	if err != nil && err != sql.ErrNoRows {
+		return 0, err
+	}
+
+	// Determine the next admin ID
+	var nextAdminID int
+	if lastAssignedAdminID.Valid {
+		lastID := int(lastAssignedAdminID.Int64)
+		index := -1
+		for i, id := range adminIDs {
+			if id == lastID {
+				index = i
+				break
+			}
+		}
+		if index != -1 && index < len(adminIDs)-1 {
+			nextAdminID = adminIDs[index+1]
+		} else {
+			nextAdminID = adminIDs[0] // Wrap around
+		}
+	} else {
+		nextAdminID = adminIDs[0] // Start with the first admin
+	}
+
+	// Assign the application to the next admin
+	_, err = db.Exec("UPDATE applications SET assigned_admin_id=? WHERE id=?", nextAdminID, applicationID)
 	if err != nil {
 		return 0, err
 	}
 
-	// Update last_assigned_admin_id
-	_, err = db.Exec("REPLACE INTO settings (key, value) VALUES ('last_assigned_admin_id', ?)", nextAdmin)
+	// Update the last assigned admin ID in settings
+	_, err = db.Exec(`
+        INSERT INTO settings (key, value) 
+        VALUES ('last_assigned_admin_id', ?) 
+        ON CONFLICT(key) DO UPDATE SET value=excluded.value
+    `, nextAdminID)
 	if err != nil {
 		return 0, err
 	}
 
-	return nextAdmin, nil
+	return nextAdminID, nil
 }
 
 func GetApplicationByID(db *sql.DB, id string) (*models.Application, error) {
@@ -234,6 +269,8 @@ func CreateApplication(db *sql.DB, brokerID int, appType string) (int, error) {
 }
 
 // GetApplicationsForAdmin fetches all applications assigned to a specific admin.
+// internal/db/db.go
+
 func GetApplicationsForAdmin(db *sql.DB, adminID int) ([]models.ApplicationWithDocuments, error) {
 	query := `
         SELECT id, broker_id, application_type, created_at
@@ -302,21 +339,25 @@ func GetDocumentsForApplication(db *sql.DB, applicationID int) ([]Document, erro
 		documents = append(documents, doc)
 	}
 
+	fmt.Printf("Fetched %d documents for application ID %d\n", len(documents), applicationID)
 	return documents, nil
 }
 
 // GetDocumentByPath fetches a document by its file path.
+// internal/db/db.go
+
 func GetDocumentByPath(db *sql.DB, filePath string) (*Document, error) {
-	var doc Document
-	query := `
+    var doc Document
+    query := `
         SELECT id, application_id, category, file_path, uploaded_at
         FROM documents
         WHERE file_path = ?
     `
-	row := db.QueryRow(query, filePath)
-	err := row.Scan(&doc.ID, &doc.ApplicationID, &doc.Category, &doc.FilePath, &doc.UploadedAt)
-	if err != nil {
-		return nil, err
-	}
-	return &doc, nil
+    row := db.QueryRow(query, filePath)
+    err := row.Scan(&doc.ID, &doc.ApplicationID, &doc.Category, &doc.FilePath, &doc.UploadedAt)
+    if err != nil {
+        return nil, err
+    }
+    return &doc, nil
 }
+

@@ -1,0 +1,104 @@
+<!-- internal/templates/view_application.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Application Details</title>
+    <link rel="stylesheet" href="/static/css/admin_dashboard.css">
+    <style>
+        /* Basic styles; you can enhance this with your own CSS */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .details {
+            margin-bottom: 30px;
+        }
+
+        .details p {
+            margin: 10px 0;
+            color: #34495e;
+        }
+
+        .documents ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .documents li {
+            margin-bottom: 10px;
+        }
+
+        .documents a {
+            color: #2980b9;
+            text-decoration: none;
+        }
+
+        .documents a:hover {
+            text-decoration: underline;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .back-link a {
+            color: #2980b9;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Application Details</h2>
+        <div class="details">
+            <p><strong>Application ID:</strong> {{.ID}}</p>
+            <p><strong>Broker ID:</strong> {{.BrokerID}}</p>
+            <p><strong>Application Type:</strong> {{.ApplicationType}}</p>
+            <p><strong>Created At:</strong> {{.CreatedAt.Format "Jan 2, 2006 3:04 PM"}}</p>
+        </div>
+
+        <div class="documents">
+            <h3>Uploaded Documents</h3>
+            <ul>
+                {{range .Documents}}
+                    <li>
+                        <strong>{{.Category}}:</strong>
+                        <a href="/serve-document?path={{.FilePath}}" target="_blank">View</a>
+                    </li>
+                {{end}}
+            </ul>
+        </div>
+
+        <div class="back-link">
+            <a href="/admin-dashboard">← Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>
