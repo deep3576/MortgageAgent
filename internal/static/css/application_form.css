@@ -1,0 +1,102 @@
+/* application_form.css */
+
+/* Reset some basic elements */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+}
+
+.form-box {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-box h2 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+    text-align: center;
+}
+
+.form-box p {
+    margin-bottom: 30px;
+    color: #7f8c8d;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #34495e;
+}
+
+.form-group input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 2px dashed #bdc3c7;
+    border-radius: 5px;
+    background-color: #ecf0f1;
+    transition: border-color 0.3s ease;
+    cursor: pointer;
+}
+
+.form-group input[type="file"]:hover {
+    border-color: #2980b9;
+    background-color: #d0e1f9;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 15px;
+    background-color: #2980b9;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+    background-color: #1c5980;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .form-box {
+        padding: 30px 20px;
+    }
+
+    .form-box h2 {
+        font-size: 1.5em;
+    }
+
+    .submit-btn {
+        font-size: 1em;
+        padding: 12px;
+    }
+}
