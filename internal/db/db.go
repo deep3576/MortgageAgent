@@ -304,3 +304,19 @@ func GetDocumentsForApplication(db *sql.DB, applicationID int) ([]Document, erro
 
 	return documents, nil
 }
+
+// GetDocumentByPath fetches a document by its file path.
+func GetDocumentByPath(db *sql.DB, filePath string) (*Document, error) {
+	var doc Document
+	query := `
+        SELECT id, application_id, category, file_path, uploaded_at
+        FROM documents
+        WHERE file_path = ?
+    `
+	row := db.QueryRow(query, filePath)
+	err := row.Scan(&doc.ID, &doc.ApplicationID, &doc.Category, &doc.FilePath, &doc.UploadedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &doc, nil
+}

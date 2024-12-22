@@ -94,11 +94,9 @@ func ApplicationFormPage(database *sql.DB) http.HandlerFunc {
 			}
 
 			// Directory to store uploads (ensure this directory exists and is writable)
-			uploadDir := "uploads"
-			os.MkdirAll(uploadDir, 0777)
 
 			for _, cat := range categories {
-				processFile(cat, r, uploadDir, database, w, appID)
+				processFile(cat, r, database, w, appID)
 			}
 			// for _, cat := range categories {
 
@@ -157,7 +155,10 @@ func ApplicationFormPage(database *sql.DB) http.HandlerFunc {
 	}
 }
 
-func processFile(cat string, r *http.Request, uploadDir string, database *sql.DB, w http.ResponseWriter, appID string) {
+func processFile(cat string, r *http.Request, database *sql.DB, w http.ResponseWriter, appID string) {
+	uploadDir := "uploads" + "/" + appID + "/" + cat
+	os.MkdirAll(uploadDir, 0777)
+
 	fmt.Println("category ::" + cat)
 
 	file, header, err := r.FormFile(cat)
@@ -187,6 +188,12 @@ func processFile(cat string, r *http.Request, uploadDir string, database *sql.DB
 
 		// Add document record in DB
 		app, err := db.GetApplicationByID(database, appID)
+		if err != nil {
+			print(err)
+			http.Error(w, "Error Getting ApplicationID", http.StatusInternalServerError)
+			return
+		}
+
 		err = db.AddDocument(database, app.ID, cat, filePath)
 		if err != nil {
 			print(err)
