@@ -28,7 +28,7 @@ func AdminLanding() http.Handler {
 			FirstName: user.FirstName,
 		}
 		println(data.FirstName)
-		tmpl := template.Must(template.ParseFiles("internal/templates/admin.html"))
+		tmpl := template.Must(template.ParseFiles("internal/templates/admin_dashboard.html"))
 		tmpl.Execute(w, data)
 	})
 }

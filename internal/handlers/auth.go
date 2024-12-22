@@ -112,7 +112,7 @@ func Login(database *sql.DB) http.HandlerFunc {
 		http.SetCookie(w, cookie)
 
 		if user.UserType == "admin" {
-			http.Redirect(w, r, "/admin", http.StatusFound)
+			http.Redirect(w, r, "/admin-dashboard", http.StatusFound)
 		} else {
 			http.Redirect(w, r, "/broker", http.StatusFound)
 		}
