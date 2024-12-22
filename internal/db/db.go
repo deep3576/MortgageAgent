@@ -34,7 +34,33 @@ func MigrateDB(db *sql.DB) error {
 		,
 		reset_token_expires_at DATETIME,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );`
+    );
+
+	CREATE TABLE IF NOT EXISTS applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    broker_id INTEGER NOT NULL,
+    application_type TEXT NOT NULL,           -- "self" or "someone_else"
+    assigned_admin_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (broker_id) REFERENCES users(id),
+    FOREIGN KEY (assigned_admin_id) REFERENCES users(id)
+	);
+
+	CREATE TABLE IF NOT EXISTS documents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    application_id INTEGER NOT NULL,
+    category TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (application_id) REFERENCES applications(id)
+);
+
+-- Optional: a settings table to keep track of last assigned admin, etc.
+	CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT
+);
+`
 	_, err := db.Exec(query)
 	return err
 }
@@ -116,4 +142,165 @@ func GetUserByResetToken(db *sql.DB, token string) (*models.User, error) {
 func UpdateUserPassword(db *sql.DB, userID int, newHash string) error {
 	_, err := db.Exec("UPDATE users SET password_hash=?, reset_token=NULL, reset_token_expires_at=NULL WHERE id=?", newHash, userID)
 	return err
+}
+
+type Document struct {
+	ID            int
+	ApplicationID int
+	Category      string
+	FilePath      string
+	UploadedAt    string
+}
+
+func AddDocument(db *sql.DB, applicationID int, category, filePath string) error {
+	print("upload File path for " + category + filePath)
+	_, err := db.Exec("INSERT INTO documents (application_id, category, file_path, uploaded_at) VALUES (?, ?, ?, ?)",
+		applicationID, category, filePath, time.Now())
+	return err
+}
+
+// Round-robin assignment logic
+func AssignApplicationToAdmin(db *sql.DB, applicationID int64) (int, error) {
+	// Example logic: Suppose we have an admins table with ids [1,2,3,...]
+	// Keep track of last_assigned in a simple settings table or memory
+	var lastAssigned int
+	err := db.QueryRow("SELECT value FROM settings WHERE key='last_assigned_admin_id'").Scan(&lastAssigned)
+	if err != nil {
+		// if no entry yet, start with admin 1
+		lastAssigned = 0
+	}
+
+	// Get next admin
+	var nextAdmin int
+	err = db.QueryRow("SELECT id FROM users WHERE user_type='admin' AND id > ? ORDER BY id LIMIT 1", lastAssigned).Scan(&nextAdmin)
+	if err != nil {
+		// if no admin found after lastAssigned, wrap around to the first admin
+		err = db.QueryRow("SELECT id FROM users WHERE user_type='admin' ORDER BY id LIMIT 1").Scan(&nextAdmin)
+		if err != nil {
+			return 0, err // No admin found at all
+		}
+	}
+
+	_, err = db.Exec("UPDATE applications SET assigned_admin_id=? WHERE id=?", nextAdmin, applicationID)
+	if err != nil {
+		return 0, err
+	}
+
+	// Update last_assigned_admin_id
+	_, err = db.Exec("REPLACE INTO settings (key, value) VALUES ('last_assigned_admin_id', ?)", nextAdmin)
+	if err != nil {
+		return 0, err
+	}
+
+	return nextAdmin, nil
+}
+
+func GetApplicationByID(db *sql.DB, id string) (*models.Application, error) {
+	a := &models.Application{}
+	row := db.QueryRow("SELECT id, broker_id, application_type, assigned_admin_id, created_at FROM applications WHERE id=?", id)
+
+	var assignedAdminID sql.NullInt64
+	err := row.Scan(&a.ID, &a.BrokerID, &a.ApplicationType, &assignedAdminID, &a.CreatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// No application found with given ID
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	if assignedAdminID.Valid {
+		val := int(assignedAdminID.Int64)
+		a.AssignedAdminID = &val
+	} else {
+		a.AssignedAdminID = nil
+	}
+
+	return a, nil
+}
+func CreateApplication(db *sql.DB, brokerID int, appType string) (int, error) {
+	res, err := db.Exec("INSERT INTO applications (broker_id, application_type, created_at) VALUES (?, ?, ?)",
+		brokerID, appType, time.Now())
+	if err != nil {
+		return 0, err
+	}
+
+	lastID, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(lastID), nil
+}
+
+// GetApplicationsForAdmin fetches all applications assigned to a specific admin.
+func GetApplicationsForAdmin(db *sql.DB, adminID int) ([]models.ApplicationWithDocuments, error) {
+	query := `
+        SELECT id, broker_id, application_type, created_at
+        FROM applications
+        WHERE assigned_admin_id = ?
+        ORDER BY created_at DESC
+    `
+	rows, err := db.Query(query, adminID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var applications []models.ApplicationWithDocuments
+
+	for rows.Next() {
+		var app models.ApplicationWithDocuments
+		err := rows.Scan(&app.ID, &app.BrokerID, &app.ApplicationType, &app.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		// Fetch associated documents for each application
+		docs, err := GetDocumentsForApplication(db, app.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Map []Document to []models.DocumentInfo
+		var documentInfos []models.DocumentInfo
+		for _, d := range docs {
+			documentInfos = append(documentInfos, models.DocumentInfo{
+				Category: d.Category,
+				FilePath: d.FilePath,
+			})
+		}
+		app.Documents = documentInfos
+
+		applications = append(applications, app)
+	}
+
+	return applications, nil
+}
+
+// GetDocumentsForApplication fetches all documents for a given application.
+func GetDocumentsForApplication(db *sql.DB, applicationID int) ([]Document, error) {
+	query := `
+        SELECT id, application_id, category, file_path, uploaded_at
+        FROM documents
+        WHERE application_id = ?
+    `
+	rows, err := db.Query(query, applicationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var documents []Document
+
+	for rows.Next() {
+		var doc Document
+		err := rows.Scan(&doc.ID, &doc.ApplicationID, &doc.Category, &doc.FilePath, &doc.UploadedAt)
+		if err != nil {
+			return nil, err
+		}
+		documents = append(documents, doc)
+	}
+
+	return documents, nil
 }

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/> 
+    <title>Broker Dashboard</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+
+</head>
+<body>
+    <header class="top-nav">
+        <img src="/static/images/logo.png" class="nav-logo" alt="Logo">
+        <nav>
+            <a href="/broker">Home</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    </header>
+
+<body>
+<div class="login-container">
+    <div class="login-box animated-fade-in">
+        <h2>Upload Required Documents</h2>
+        <p>Please provide the following documents:</p>
+        <form method="post" action="/application-form" enctype="multipart/form-data">
+            <input type="hidden" name="application_id" value="{{.ApplicationID}}">
+
+            <div class="input-group">
+                <label>Identification (Government-Issued ID)</label>
+                <input type="file" name="Identification" required>
+            </div>
+
+            <div class="input-group">
+                <label>Proof of income (Pay Stubs, Tax Forms)</label>
+                <input type="file" name="Proof of income" required>
+            </div>
+
+            <div class="input-group">
+                <label>Basic financial information (Bank Statements, Investments)</label>
+                <input type="file" name="Basic financial information" required>
+            </div>
+
+            <div class="input-group">
+                <label>Down payment confirmation (Sale Agreement, Savings docs)</label>
+                <input type="file" name="Down payment confirmation" required>
+            </div>
+
+            <div class="input-group">
+                <label>Property details (Purchase and Sale Agreement, MLS Listing)</label>
+                <input type="file" name="Property details" required>
+            </div>
+
+            <button type="submit">Submit Application</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
